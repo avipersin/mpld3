@@ -588,7 +588,7 @@ class InteractiveLegendPlugin(PluginBase):
                     d3.select(d.mpld3_elements[i].path[0][0])
                         .style("stroke-opacity", is_over ? current_alpha_over :
                                                 (d.visible ? current_alpha : current_alpha_unsel))
-                        .style("stroke-width", is_over ? 
+                        .style("stroke-width", is_over ?
                                 alpha_over * d.mpld3_elements[i].props.edgewidth : d.mpld3_elements[i].props.edgewidth);
                 } else if((type=="mpld3_PathCollection")||
                          (type=="mpld3_Markers")){
@@ -600,7 +600,17 @@ class InteractiveLegendPlugin(PluginBase):
                                                 (d.visible ? current_alpha : current_alpha_unsel))
                         .style("fill-opacity", is_over ? current_alpha_over :
                                                 (d.visible ? current_alpha : current_alpha_unsel));
-                } else{
+                } else if(type=="mpld3_Path"){
+                    var current_alpha = d.mpld3_elements[i].props.alpha;
+                    var current_alpha_unsel = current_alpha * alpha_unsel;
+                    var current_alpha_over = current_alpha * alpha_over;
+                    d3.select(d.mpld3_elements[i].path[0][0])
+                        .style("stroke-opacity", is_over ? current_alpha_over :
+                                                (d.visible ? current_alpha : current_alpha_unsel))
+                        .style("fill-opacity", is_over ? current_alpha_over :
+                                                (d.visible ? current_alpha : current_alpha_unsel))
+
+                 }else{
                     console.log(type + " not yet supported");
                 }
             }
@@ -616,7 +626,9 @@ class InteractiveLegendPlugin(PluginBase):
             } else if((type=="mpld3_PathCollection")||
                       (type=="mpld3_Markers")){
                 color = d.mpld3_elements[0].props.facecolors[0];
-            } else{
+            } else if(type=="mpld3_Path"){
+                color = d.mpld3_elements[0].props.facecolor;
+            }else{
                 console.log(type + " not yet supported");
             }
             return color;
@@ -643,7 +655,7 @@ class InteractiveLegendPlugin(PluginBase):
             start_visible = [start_visible] * len(labels)
         elif not len(start_visible) == len(labels):
             raise ValueError("{} out of {} visible params has been set"
-                             .format(len(start_visible), len(labels)))     
+                             .format(len(start_visible), len(labels)))
 
         mpld3_element_ids = self._determine_mpld3ids(plot_elements)
         self.mpld3_element_ids = mpld3_element_ids
@@ -720,7 +732,7 @@ class PointClickableHTMLTooltip(PluginBase):
 
     """
 
-    JAVASCRIPT="""
+    JAVASCRIPT = """
     mpld3.register_plugin("clickablehtmltooltip", PointClickableHTMLTooltip);
     PointClickableHTMLTooltip.prototype = Object.create(mpld3.Plugin.prototype);
     PointClickableHTMLTooltip.prototype.constructor = PointClickableHTMLTooltip;
@@ -763,6 +775,7 @@ class PointClickableHTMLTooltip(PluginBase):
                            tooltip.style("visibility", "hidden");});
     };
     """
+
     def __init__(self, points, labels=None, targets=None,
                  hoffset=2, voffset=-6, css=None):
         self.points = points
@@ -792,7 +805,7 @@ class PointClickableHTMLTooltip(PluginBase):
 class MouseXPosition(PluginBase):
     """Like MousePosition, but only show the X coordinate"""
 
-    JAVASCRIPT="""
+    JAVASCRIPT = """
   mpld3.register_plugin("mousexposition", MouseXPositionPlugin);
   MouseXPositionPlugin.prototype = Object.create(mpld3.Plugin.prototype);
   MouseXPositionPlugin.prototype.constructor = MouseXPositionPlugin;
@@ -832,7 +845,6 @@ class MouseXPosition(PluginBase):
     >>> plugins.connect(fig, plugins.MouseXPosition())
     >>> fig_to_html(fig)
     """
-
     def __init__(self, fontsize=12, fmt="8.0f"):
         self.dict_ = {"type": "mousexposition",
                       "fontsize": fontsize,
